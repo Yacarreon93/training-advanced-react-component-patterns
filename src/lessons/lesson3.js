@@ -2,7 +2,14 @@ import React, { Component } from 'react';
 
 import Switch from '../Switch';
 
-const ToggleContext = React.createContext();
+/*
+  Create a Context default to avoid errors.
+  However Toggle will do nothing when clicking on it.
+*/
+const ToggleContext = React.createContext({
+  on: false,
+  toggle: () => {},
+});
 
 class Toggle extends Component {
   static On = ({ children }) => (
@@ -44,7 +51,6 @@ function Usage({
   onToggle = (...args) => console.log('onToggle', ...args),
 }) {
   return (
-    // Code will crash when Context Provider is not wrapping Toggle elements.
     <div>
       <Toggle.On>Toggle is On</Toggle.On>
       <Toggle.Off>Toggle is Off</Toggle.Off>
