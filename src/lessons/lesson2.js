@@ -2,13 +2,25 @@ import React, { Component } from 'react';
 
 import Switch from '../Switch';
 
-class Toggle extends Component {
-  static On = ({ on, children }) => (on ? children : null);
-  
-  static Off = ({ on, children }) => (on ? null : children);
+const ToggleContext = React.createContext();
 
-  static Button = ({ on, toggle, ...props }) => (
-    <Switch checked={on} onChange={toggle} {...props} />
+class Toggle extends Component {
+  static On = ({ children }) => (
+    <ToggleContext.Consumer>
+      {({ on }) => on ? children : null}
+    </ToggleContext.Consumer>
+  );
+  
+  static Off = ({ children }) => (
+    <ToggleContext.Consumer>
+      {({ on }) => on ? null : children}
+    </ToggleContext.Consumer>
+  );
+  
+  static Button = props => (
+    <ToggleContext.Consumer>
+      {({ on, toggle }) => <Switch checked={on} onChange={toggle} {...props} />}
+    </ToggleContext.Consumer>
   );
 
   state = { checked: false };
@@ -18,13 +30,13 @@ class Toggle extends Component {
     () => { this.props.onToggle(this.state.checked); },
   );
 
+  // Use Context to get access to the props regardless of the element location.
   render() {
-    return React.Children.map(this.props.children, child => (
-      React.cloneElement(child, {
-        on: this.state.checked,
-        toggle: this.onChange,
-      })
-    ));
+    return (
+      <ToggleContext.Provider value={{ on: this.state.checked, toggle: this.onChange }}>
+        {this.props.children}
+      </ToggleContext.Provider>
+    )
   }
 }
   
@@ -35,10 +47,6 @@ function Usage({
     <Toggle onToggle={onToggle}>
       <Toggle.On>Toggle is On</Toggle.On>
       <Toggle.Off>Toggle is Off</Toggle.Off>
-      {/*
-        Since Button is wrapped in a div, it doesn't reach "on" and "toggle" props.
-        See errors in the browser console.
-      */}
       <div>
         <Toggle.Button />
       </div>
