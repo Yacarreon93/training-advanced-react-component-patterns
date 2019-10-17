@@ -2,32 +2,39 @@ import React, { Component } from 'react';
 
 import Switch from '../Switch';
 
-/*
-  Create a Context default to avoid errors.
-  However Toggle will do nothing when clicking on it.
-*/
-const ToggleContext = React.createContext({
-  on: false,
-  toggle: () => {},
-});
+const ToggleContext = React.createContext();
+
+function ToggleConsumer(props) {
+  return (
+    <ToggleContext.Consumer>
+      {(context) => {
+        if (!context) {
+          throw new Error('Toggle compound components must be rendered within the Toggle component');
+        }
+
+        return props.children(context);
+      }}
+    </ToggleContext.Consumer>
+  );
+}
 
 class Toggle extends Component {
   static On = ({ children }) => (
-    <ToggleContext.Consumer>
+    <ToggleConsumer>
       {({ on }) => on ? children : null}
-    </ToggleContext.Consumer>
+    </ToggleConsumer>
   );
   
   static Off = ({ children }) => (
-    <ToggleContext.Consumer>
+    <ToggleConsumer>
       {({ on }) => on ? null : children}
-    </ToggleContext.Consumer>
+    </ToggleConsumer>
   );
   
   static Button = props => (
-    <ToggleContext.Consumer>
+    <ToggleConsumer>
       {({ on, toggle }) => <Switch checked={on} onChange={toggle} {...props} />}
-    </ToggleContext.Consumer>
+    </ToggleConsumer>
   );
 
   state = { checked: false };
@@ -51,6 +58,8 @@ function Usage({
   onToggle = (...args) => console.log('onToggle', ...args),
 }) {
   return (
+    // Use Toggle component to avoid errors.
+    // <Toggle onToggle={onToggle}>
     <div>
       <Toggle.On>Toggle is On</Toggle.On>
       <Toggle.Off>Toggle is Off</Toggle.Off>
@@ -58,6 +67,7 @@ function Usage({
         <Toggle.Button />
       </div>
     </div>
+    // </Toggle>
   );
 }
 
