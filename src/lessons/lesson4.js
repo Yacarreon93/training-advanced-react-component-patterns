@@ -37,17 +37,27 @@ class Toggle extends Component {
     </ToggleConsumer>
   );
 
-  state = { checked: false };
-
-  onChange = () => this.setState(
-    ({ checked }) => ({ checked: !checked }),
+  toggle = () => this.setState(
+    ({ on }) => ({ on: !on }),
     () => { this.props.onToggle(this.state.checked); },
   );
 
-  // Use Context to get access to the props regardless of the element location.
+  /*
+    Use the "state" as Context value to aviod unnecesary changes.
+    This is a common pattern when using Context.
+  */
+  state = { on: false, toggle: this.toggle };
+
   render() {
     return (
-      <ToggleContext.Provider value={{ on: this.state.checked, toggle: this.onChange }}>
+      <ToggleContext.Provider
+        /*
+          This way the "value" is a new object every single time "render" is called,
+          so, the Consumers are rendered every single time the value changes.
+        */
+        // value={{ on: this.state.on, toggle: this.toggle }}
+        value={this.state}
+      >
         {this.props.children}
       </ToggleContext.Provider>
     )
