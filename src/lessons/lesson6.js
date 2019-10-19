@@ -10,11 +10,20 @@ class Toggle extends Component {
     () => { this.props.onToggle(this.state.on); },
   );
 
-  render() {
-    return this.props.children({
+  getStateAndHelpers() {
+    return {
       on: this.state.on,
       toggle: this.toggle,
-    });
+      togglerProps: {
+        onClick: this.toggle,
+        onChange: this.toggle,
+        'aria-pressed': this.state.on,
+      },
+    };
+  }
+
+  render() {
+    return this.props.children(this.getStateAndHelpers());
   }
 }
   
@@ -25,14 +34,14 @@ function Usage({
     <Toggle
       onToggle={onToggle}
     >
-      {({ on, toggle }) => (
+      {({ on, togglerProps }) => (
         <div>
           Toggle is {on ? 'On' : 'Off'}
           <div>
-            <Switch checked={on} onChange={toggle} />
+            <Switch checked={on} {...togglerProps} />
           </div>
           <hr />
-          <button aria-label="custom-button" onClick={toggle}>
+          <button aria-label="custom-button" {...togglerProps}>
             {on ? 'on' : 'off'}
           </button>
         </div>
