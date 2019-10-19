@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 
 import Switch from '../Switch';
 
-const renderUI = ({ on, toggle }) => <Switch checked={on} onChange={toggle} />;
-
 class Toggle extends Component {
   state = { on: false };
 
@@ -19,10 +17,18 @@ class Toggle extends Component {
     });
   }
 }
+
+const CommonToggle = props => (
+  <Toggle {...props}>
+    {({ on, toggle }) => <Switch checked={on} onChange={toggle} />}
+  </Toggle>
+);
   
 function Usage({
   onToggle = (...args) => console.log('onToggle', ...args),
 }) {
+  return <CommonToggle onToggle={onToggle} />;
+
   return (
     <Toggle
       onToggle={onToggle}
