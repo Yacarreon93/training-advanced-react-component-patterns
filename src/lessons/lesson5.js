@@ -5,8 +5,6 @@ import Switch from '../Switch';
 const renderUI = ({ on, toggle }) => <Switch checked={on} onChange={toggle} />;
 
 class Toggle extends Component {
-  static defaultProps = { renderUI };
-
   state = { on: false };
 
   toggle = () => this.setState(
@@ -15,7 +13,7 @@ class Toggle extends Component {
   );
 
   render() {
-    return this.props.renderUI({
+    return this.props.children({
       on: this.state.on,
       toggle: this.toggle,
     });
@@ -28,7 +26,8 @@ function Usage({
   return (
     <Toggle
       onToggle={onToggle}
-      renderUI={({ on, toggle }) => (
+    >
+      {({ on, toggle }) => (
         <div>
           Toggle is {on ? 'On' : 'Off'}
           <div>
@@ -40,7 +39,7 @@ function Usage({
           </button>
         </div>
       )}
-    />
+    </Toggle>
   );
 }
 
