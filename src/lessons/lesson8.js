@@ -12,18 +12,20 @@ class Toggle extends Component {
     () => { this.props.onToggle(this.state.on); },
   );
 
+  reset = () => this.setState(
+    { on: false },
+    () => { this.props.onReset(this.state.on); },
+  );
+
   getStateAndHelpers() {
     return {
       on: this.state.on,
+      reset: this.reset,
       toggle: this.toggle,
       getTogglerProps: this.getTogglerProps,
     };
   }
 
-  /*
-    Works as a way to mix the props rqquired by the Toggle
-    component and the ones declared by the developer.
-  */
   getTogglerProps = ({ onClick, ...props }) => ({
     onClick: callAll(onClick, this.toggle),
     onChange: this.toggle,
@@ -37,25 +39,25 @@ class Toggle extends Component {
 }
   
 function Usage({
+  initialOn = false,
   onToggle = (...args) => console.log('onToggle', ...args),
-  onButtonClick = () => alert('onButtonClick'),
+  onReset = (...args) => console.log('onReset', ...args),
 }) {
   return (
     <Toggle
+      initialOn={initialOn} 
       onToggle={onToggle}
+      onReset={onReset}
     >
-      {({ on, getTogglerProps }) => (
+      {({ on, getTogglerProps, reset }) => (
         <div>
           Toggle is {on ? 'On' : 'Off'}
           <div>
             <Switch {...getTogglerProps({ checked: on })} />
           </div>
           <hr />
-          <button {...getTogglerProps({
-            ariaLabel: "custom-button",
-            onClick: onButtonClick,
-          })}>
-            {on ? 'on' : 'off'}
+          <button onClick={reset}>
+            Reset
           </button>
         </div>
       )}
