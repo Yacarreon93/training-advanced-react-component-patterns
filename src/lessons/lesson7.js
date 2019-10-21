@@ -29,6 +29,7 @@ class Toggle extends Component {
   
 function Usage({
   onToggle = (...args) => console.log('onToggle', ...args),
+  onButtonClick = () => alert('onButtonClick'),
 }) {
   return (
     <Toggle
@@ -41,7 +42,11 @@ function Usage({
             <Switch checked={on} {...togglerProps} />
           </div>
           <hr />
-          <button aria-label="custom-button" {...togglerProps}>
+          <button
+            {...togglerProps}
+            aria-label="custom-button"            
+            onClick={onButtonClick} // "onClick" is overwritten.
+          >
             {on ? 'on' : 'off'}
           </button>
         </div>
