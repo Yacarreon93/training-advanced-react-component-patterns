@@ -5,7 +5,14 @@ import Switch from '../Switch';
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn && fn(...args));
 
 class Toggle extends Component {
-  state = { on: false };
+  static defaultProps = {
+    initialOn: false,
+    onReset: () => {},
+  };
+
+  initialState = { on: this.props.initialOn };
+
+  state = this.initialState;
 
   toggle = () => this.setState(
     ({ on }) => ({ on: !on }),
@@ -13,7 +20,7 @@ class Toggle extends Component {
   );
 
   reset = () => this.setState(
-    { on: false },
+    this.initialState,
     () => { this.props.onReset(this.state.on); },
   );
 
@@ -39,13 +46,13 @@ class Toggle extends Component {
 }
   
 function Usage({
-  initialOn = false,
+  initialOn = true,
   onToggle = (...args) => console.log('onToggle', ...args),
   onReset = (...args) => console.log('onReset', ...args),
 }) {
   return (
     <Toggle
-      initialOn={initialOn} 
+      initialOn={initialOn}
       onToggle={onToggle}
       onReset={onReset}
     >
