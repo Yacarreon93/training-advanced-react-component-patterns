@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 
 import Switch from '../Switch';
 
+const callAll = (...fns) => (...args) => fns.forEach(fn => fn && fn(...args));
+
 class Toggle extends Component {
   state = { on: false };
 
@@ -14,13 +16,20 @@ class Toggle extends Component {
     return {
       on: this.state.on,
       toggle: this.toggle,
-      togglerProps: {
-        onClick: this.toggle,
-        onChange: this.toggle,
-        'aria-pressed': this.state.on,
-      },
+      getTogglerProps: this.getTogglerProps,
     };
   }
+
+  /*
+    Works as a way to mix the props rqquired by the Toggle
+    component and the ones declared by the developer.
+  */
+  getTogglerProps = ({ onClick, ...props }) => ({
+    onClick: callAll(onClick, this.toggle),
+    onChange: this.toggle,
+    'aria-pressed': this.state.on,
+    ...props,
+  });
 
   render() {
     return this.props.children(this.getStateAndHelpers());
@@ -35,22 +44,17 @@ function Usage({
     <Toggle
       onToggle={onToggle}
     >
-      {({ on, togglerProps }) => (
+      {({ on, getTogglerProps }) => (
         <div>
           Toggle is {on ? 'On' : 'Off'}
           <div>
-            <Switch checked={on} {...togglerProps} />
+            <Switch {...getTogglerProps({ checked: on })} />
           </div>
           <hr />
-          <button
-            {...togglerProps}
-            aria-label="custom-button"            
-            onClick={() => {
-              // Overwritten "onClick" solved!
-              onButtonClick();
-              togglerProps.onClick();
-            }}
-          >
+          <button {...getTogglerProps({
+            ariaLabel: "custom-button",
+            onClick: onButtonClick,
+          })}>
             {on ? 'on' : 'off'}
           </button>
         </div>
