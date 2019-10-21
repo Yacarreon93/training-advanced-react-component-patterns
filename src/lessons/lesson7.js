@@ -45,7 +45,11 @@ function Usage({
           <button
             {...togglerProps}
             aria-label="custom-button"            
-            onClick={onButtonClick} // "onClick" is overwritten.
+            onClick={() => {
+              // Overwritten "onClick" solved!
+              onButtonClick();
+              togglerProps.onClick();
+            }}
           >
             {on ? 'on' : 'off'}
           </button>
