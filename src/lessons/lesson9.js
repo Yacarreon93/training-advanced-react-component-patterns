@@ -14,12 +14,22 @@ class Toggle extends Component {
 
   state = this.initialState;
 
-  toggle = () => this.setState(
+  internalSetState(changes, callback) {
+    this.setState(state => {
+      const changesObject = typeof changes === 'function' ? changes(state) : changes;
+      
+      const reducedChanges = this.props.stateReducer(state, changesObject);
+
+      return reducedChanges;
+    }, callback);
+  }
+
+  toggle = () => this.internalSetState(
     ({ on }) => ({ on: !on }),
     () => { this.props.onToggle(this.state.on); },
   );
 
-  reset = () => this.setState(
+  reset = () => this.internalSetState(
     this.initialState,
     () => { this.props.onReset(this.state.on); },
   );
@@ -45,31 +55,64 @@ class Toggle extends Component {
   }
 }
   
-function Usage({
-  initialOn = true,
-  onToggle = (...args) => console.log('onToggle', ...args),
-  onReset = (...args) => console.log('onReset', ...args),
-}) {
-  return (
-    <Toggle
-      initialOn={initialOn}
-      onToggle={onToggle}
-      onReset={onReset}
-    >
-      {({ on, getTogglerProps, reset }) => (
-        <div>
-          Toggle is {on ? 'On' : 'Off'}
+class Usage extends Component {
+  initialState = { timesClicked: 0 };
+
+  state = this.initialState;
+
+  handleToggle =  (...args) => {
+    this.setState(({ timesClicked }) => ({
+      timesClicked: timesClicked + 1,
+    }));
+  }
+  
+  handleReset = (...args) => {
+    this.setState(this.initialState);
+  };
+
+  toggleStateReducer = (state, changes) => {
+    if (this.state.timesClicked >= 4) {
+      return { ...changes, on: false };
+    }
+
+    return changes;
+  }
+
+  render() {
+    const { timesClicked } = this.state;
+
+    console.log('timesClicked', timesClicked);
+
+    return (
+      <Toggle
+        stateReducer={this.toggleStateReducer}
+        onToggle={this.handleToggle}
+        onReset={this.handleReset}
+      >
+        {({ on, getTogglerProps, reset }) => (
           <div>
-            <Switch {...getTogglerProps({ checked: on })} />
+            Toggle is {on ? 'On' : 'Off'}
+            <div>
+              <Switch {...getTogglerProps({ checked: on })} />
+            </div>
+            {timesClicked > 4 ? (
+              <div>
+                Whoa, you clicked too much!<br />
+              </div>
+            ) : timesClicked > 0 ? (
+              <div>
+                Click count: {timesClicked}<br />
+              </div>
+            ) : null}
+            <hr />
+            <button onClick={reset}>
+              Reset
+            </button>
           </div>
-          <hr />
-          <button onClick={reset}>
-            Reset
-          </button>
-        </div>
-      )}
-    </Toggle>
-  );
+        )}
+      </Toggle>
+    );
+  }
 }
 
 export default Usage;
