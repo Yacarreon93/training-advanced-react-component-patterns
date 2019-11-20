@@ -25,15 +25,15 @@ class Toggle extends Component {
     }, callback);
   }
 
-  toggle = () => this.internalSetState(
-    ({ on }) => ({ on: !on }),
-    () => { this.props.onToggle(this.state.on); },
-  );
+  toggle = ({ type = 'toggle' } = {}) => this.internalSetState(({ on }) => ({
+    type,
+    on: !on,
+  }), () => this.props.onToggle(this.state.on));
 
-  reset = () => this.internalSetState(
-    this.initialState,
-    () => { this.props.onReset(this.state.on); },
-  );
+  reset = () => this.internalSetState({
+    ...this.initialState,
+    type: 'reset',
+  }, () => this.props.onReset(this.state.on));
 
   getStateAndHelpers() {
     return {
@@ -45,8 +45,8 @@ class Toggle extends Component {
   }
 
   getTogglerProps = ({ onClick, ...props }) => ({
-    onClick: callAll(onClick, this.toggle),
-    onChange: this.toggle,
+    onClick: callAll(onClick, () => this.toggle()),
+    onChange: () => this.toggle(),
     'aria-pressed': this.state.on,
     ...props,
   });
@@ -72,6 +72,10 @@ class Usage extends Component {
   };
 
   toggleStateReducer = (state, changes) => {
+    if (changes.type === 'forced') {
+      return changes;
+    }
+
     if (this.state.timesClicked >= 4) {
       return { ...changes, on: false };
     }
@@ -90,15 +94,22 @@ class Usage extends Component {
         onToggle={this.handleToggle}
         onReset={this.handleReset}
       >
-        {({ on, getTogglerProps, reset }) => (
+        {({ on, getTogglerProps, reset, toggle }) => (
           <div>
             Toggle is {on ? 'On' : 'Off'}
+            <br />
             <div>
               <Switch {...getTogglerProps({ checked: on })} />
             </div>
             {timesClicked > 4 ? (
               <div>
-                Whoa, you clicked too much!<br />
+                Whoa, you clicked too much!
+                <br />
+                <br />
+                <button onClick={() => toggle({ type: 'forced' })}>
+                  Force toggle!
+                </button>
+                <br />
               </div>
             ) : timesClicked > 0 ? (
               <div>
