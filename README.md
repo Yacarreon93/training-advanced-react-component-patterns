@@ -15,3 +15,4 @@ You will also see any lint errors in the console.
 ## Content
 
 - Lesson 10: Improve the usability of component state reducers with state change types.
+- Lesson 11: Make controlled React components with control props.
