@@ -20,6 +20,10 @@ class Toggle extends Component {
 
   state = this.initialState;
 
+  getOn() {
+    return this.props.on !== undefined ? this.props.on : this.state.on; // Make Toggle support props and state.
+  }
+
   internalSetState(changes, callback) {
     this.setState(state => {
       const changesObject = typeof changes === 'function' ? changes(state) : changes;
@@ -35,10 +39,16 @@ class Toggle extends Component {
     }, callback);
   }
 
-  toggle = ({ type = Toggle.stateChangeTypes.toggle } = {}) => this.internalSetState(({ on }) => ({
-    type,
-    on: !on,
-  }), () => this.props.onToggle(this.state.on));
+  toggle = ({ type = Toggle.stateChangeTypes.toggle } = {}) => {
+    if (this.props.on !== undefined) {
+      this.props.onToggle(!this.getOn())
+    } else {
+      this.internalSetState(({ on }) => ({
+        type,
+        on: !on,
+      }), () => this.props.onToggle(this.getOn()));
+    }
+  };
 
   reset = () => this.internalSetState({
     ...this.initialState,
@@ -47,7 +57,7 @@ class Toggle extends Component {
 
   getStateAndHelpers() {
     return {
-      on: this.props.on, // Make Toggle controlled by prop.
+      on: this.props.on !== undefined ? this.props.on : this.state.on, // Make Toggle support props and state.
       reset: this.reset,
       toggle: this.toggle,
       getTogglerProps: this.getTogglerProps,
@@ -79,13 +89,12 @@ class Usage extends Component {
     const { bothOn } = this.state;
 
     /*
-      The idea is to make both Toggles controlled by "bothOn".
-      The Toggle "on" prop is ignored for now.
+      This is how both controlled and inner state are supported:
     */
     return (
       <div>
         <Toggle on={bothOn} onToggle={this.handleToggle} />
-        <Toggle on={bothOn} onToggle={this.handleToggle} />
+        <Toggle onToggle={this.handleToggle} />
       </div>
     );
   }
