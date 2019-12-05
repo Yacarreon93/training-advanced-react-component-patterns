@@ -47,7 +47,7 @@ class Toggle extends Component {
 
   getStateAndHelpers() {
     return {
-      on: this.state.on,
+      on: this.props.on, // Make Toggle controlled by prop.
       reset: this.reset,
       toggle: this.toggle,
       getTogglerProps: this.getTogglerProps,
