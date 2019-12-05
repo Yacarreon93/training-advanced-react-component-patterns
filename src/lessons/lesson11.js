@@ -98,7 +98,7 @@ class Usage extends Component {
     return (
       <div>
         <Toggle on={bothOn} onToggle={this.handleToggle} />
-        <Toggle onToggle={this.handleToggle} />
+        <Toggle on={bothOn} onToggle={this.handleToggle} /> {/* Make both Toggles controlled */}
       </div>
     );
   }
