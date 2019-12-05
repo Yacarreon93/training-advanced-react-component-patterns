@@ -21,7 +21,11 @@ class Toggle extends Component {
   state = this.initialState;
 
   getOn() {
-    return this.props.on !== undefined ? this.props.on : this.state.on; // Make Toggle support props and state.
+    return this.isControlled('on') ? this.props.on : this.state.on; // Make Toggle support props and state.
+  }
+
+  isControlled(prop) {
+    return this.props[prop] !== undefined;
   }
 
   internalSetState(changes, callback) {
@@ -40,7 +44,7 @@ class Toggle extends Component {
   }
 
   toggle = ({ type = Toggle.stateChangeTypes.toggle } = {}) => {
-    if (this.props.on !== undefined) {
+    if (this.isControlled('on')) {
       this.props.onToggle(!this.getOn())
     } else {
       this.internalSetState(({ on }) => ({
@@ -57,7 +61,7 @@ class Toggle extends Component {
 
   getStateAndHelpers() {
     return {
-      on: this.props.on !== undefined ? this.props.on : this.state.on, // Make Toggle support props and state.
+      on: this.getOn(), // Make Toggle support props and state.
       reset: this.reset,
       toggle: this.toggle,
       getTogglerProps: this.getTogglerProps,
