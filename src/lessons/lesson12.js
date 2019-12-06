@@ -20,8 +20,16 @@ class Toggle extends Component {
 
   state = this.initialState;
 
-  getOn() {
-    return this.isControlled('on') ? this.props.on : this.state.on; // Make Toggle support props and state.
+  getState() {
+    return Object.entries(this.state).reduce((combinedState, [key, value]) => {
+      if (this.isControlled(key)) {
+        combinedState[key] = this.props[key];
+      } else {
+        combinedState[key] = value;
+      }
+
+      return combinedState; 
+    }, {});
   }
 
   isControlled(prop) {
@@ -45,12 +53,12 @@ class Toggle extends Component {
 
   toggle = ({ type = Toggle.stateChangeTypes.toggle } = {}) => {
     if (this.isControlled('on')) {
-      this.props.onToggle(!this.getOn())
+      this.props.onToggle(!this.getState().on)
     } else {
       this.internalSetState(({ on }) => ({
         type,
         on: !on,
-      }), () => this.props.onToggle(this.getOn()));
+      }), () => this.props.onToggle(this.getState().on));
     }
   };
 
@@ -61,7 +69,7 @@ class Toggle extends Component {
 
   getStateAndHelpers() {
     return {
-      on: this.getOn(), // Make Toggle support props and state.
+      on: this.getState().on,
       reset: this.reset,
       toggle: this.toggle,
       getTogglerProps: this.getTogglerProps,
