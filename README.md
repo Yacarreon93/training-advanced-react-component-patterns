@@ -18,3 +18,4 @@ You will also see any lint errors in the console.
 - Lesson 11: Make controlled React components with control props.
 - Lesson 12: Support control props for all state.
 - Lesson 13: Support a state change handler for all control props.
+- Lesson 14: Improve the usability of control props with state change types.
