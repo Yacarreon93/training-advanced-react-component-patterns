@@ -99,10 +99,20 @@ class Toggle extends Component {
     ...props,
   });
 
+  handleOffClick = () => this.toggle({ on: false });
+
+  handleOnClick = () => this.toggle({ on: true });
+
   render() {
     return this.props.children
       ? this.props.children(this.getStateAndHelpers())
-      : <Switch {...this.getTogglerProps({ checked: this.getStateAndHelpers().on })} />;
+      : (
+        <div>
+          <Switch {...this.getTogglerProps({ checked: this.getStateAndHelpers().on })} />
+          <button onClick={this.handleOffClick}>off</button>
+          <button onClick={this.handleOnClick}>on</button>
+        </div>
+      );
   }
 }
   
