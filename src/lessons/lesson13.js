@@ -8,6 +8,8 @@ class Toggle extends Component {
   static defaultProps = {
     initialOn: false,
     onReset: () => {},
+    onToggle: () => {},
+    onStateChange: () => {},
     stateReducer: (state, changes) => changes,
   };
 
@@ -20,8 +22,8 @@ class Toggle extends Component {
 
   state = this.initialState;
 
-  getState() {
-    return Object.entries(this.state).reduce((combinedState, [key, value]) => {
+  getState(state = this.state) {
+    return Object.entries(state).reduce((combinedState, [key, value]) => {
       if (this.isControlled(key)) {
         combinedState[key] = this.props[key];
       } else {
@@ -37,10 +39,24 @@ class Toggle extends Component {
   }
 
   internalSetState(changes, callback) {
+    let allChanges;
+
     this.setState(state => {
-      const changesObject = typeof changes === 'function' ? changes(state) : changes;
+      const combinedState = this.getState(state);
       
-      const reducedChanges = this.props.stateReducer(state, changesObject);
+      const changesObject = typeof changes === 'function' ? changes(combinedState) : changes;
+
+      allChanges = changesObject;
+
+      const nonControlledChanges = Object.entries(changesObject).reduce((newChanges, [key, value]) => {
+        if (!this.isControlled(key)) {
+          newChanges[key] = value;
+        }
+        
+        return newChanges;
+      }, {});
+      
+      const reducedChanges = this.props.stateReducer(state, nonControlledChanges);
 
       /*
         Ignore "type" to avoid re-render unnecessarily.
@@ -48,18 +64,18 @@ class Toggle extends Component {
       const { type: ignoredType, ...onlyChanges } = reducedChanges;
 
       return onlyChanges;
-    }, callback);
+    }, () => {
+      this.props.onStateChange(allChanges);
+
+      callback();
+    });
   }
 
   toggle = ({ type = Toggle.stateChangeTypes.toggle } = {}) => {
-    if (this.isControlled('on')) {
-      this.props.onToggle(!this.getState().on)
-    } else {
-      this.internalSetState(({ on }) => ({
-        type,
-        on: !on,
-      }), () => this.props.onToggle(this.getState().on));
-    }
+    this.internalSetState(({ on }) => ({
+      type,
+      on: !on,
+    }), () => this.props.onToggle(this.getState().on));
   };
 
   reset = () => this.internalSetState({
@@ -97,16 +113,18 @@ class Usage extends Component {
 
   handleToggle = on => this.setState(({ bothOn: on }));
 
+  handleStateChange = ({ on }) => this.setState({ bothOn: on });
+
   render() {
     const { bothOn } = this.state;
 
     /*
-      This is how both controlled and inner state are supported:
+      What if we want to send all control props?
     */
     return (
       <div>
-        <Toggle on={bothOn} onToggle={this.handleToggle} />
-        <Toggle on={bothOn} onToggle={this.handleToggle} /> {/* Make both Toggles controlled */}
+        <Toggle on={bothOn} onStateChange={this.handleStateChange} />
+        <Toggle on={bothOn} onStateChange={this.handleStateChange} />
       </div>
     );
   }
