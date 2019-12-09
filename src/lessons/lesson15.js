@@ -4,6 +4,11 @@ import Switch from '../Switch';
 
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn && fn(...args));
 
+const ToggleContext = React.createContext({
+  on: false,
+  toggle: () => {},
+});
+
 class Toggle extends Component {
   static defaultProps = {
     initialOn: false,
@@ -19,6 +24,8 @@ class Toggle extends Component {
     toggleOff: '__toggle_off__',
     toggleOn: '__toggle_on__',
   };
+
+  static Consumer = ToggleContext.Consumer;
 
   initialState = { on: this.props.initialOn };
 
@@ -107,7 +114,7 @@ class Toggle extends Component {
 
   render() {
     return this.props.children
-      ? this.props.children(this.getStateAndHelpers())
+      ? <ToggleContext.Provider value={this.getStateAndHelpers()} {...this.props} />
       : (
         <div>
           <Switch {...this.getTogglerProps({ checked: this.getStateAndHelpers().on })} />
@@ -119,18 +126,25 @@ class Toggle extends Component {
 }
 
 /*
-  What if we have a lot of layers?
-  Should we have to pass the props to every layer?
+  Use provider instead of passing the props to each layer:
 */
-const Layer1 = ({ on, toggle }) => <Layer2 on={on} toggle={toggle} />;
-const Layer2 = ({ on, toggle }) => (
-  <Fragment>
-    {on ? 'The button is ON' : 'The button is OFF'}
-    <Layer3 on={on} toggle={toggle} />
-  </Fragment>
+const Layer1 = () => <Layer2 />;
+const Layer2 = () => (
+  <Toggle.Consumer>
+    {({ on }) => (
+      <Fragment>
+        {on ? 'The button is ON' : 'The button is OFF'}
+        <Layer3 />
+      </Fragment>
+    )}
+  </Toggle.Consumer>
 );
-const Layer3 = ({ on, toggle }) => <Layer4 on={on} toggle={toggle} />;
-const Layer4 = ({ on, toggle }) => <Switch checked={on} onChange={toggle} />;
+const Layer3 = () => <Layer4 />;
+const Layer4 = () => (
+  <Toggle.Consumer>
+    {({ on, toggle }) => <Switch checked={on} onChange={toggle} />}
+  </Toggle.Consumer>
+);
   
 class Usage extends Component {
   initialState = { bothOn: false };
@@ -161,7 +175,7 @@ class Usage extends Component {
     return (
       <div>
         <Toggle onToggle={this.handleToggle}>
-          {({ on, toggle }) => <Layer1 on={on} toggle={toggle} />}
+          <Layer1 />
         </Toggle>
       </div>
     );
