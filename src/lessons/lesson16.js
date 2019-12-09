@@ -125,26 +125,30 @@ class Toggle extends Component {
   }
 }
 
+function withToggle(Component) {
+  const Wrapper = props => (
+    <Toggle.Consumer>
+      {toggleContext => <Component toggle={toggleContext} {...props} />}
+    </Toggle.Consumer>
+  );
+
+  return Wrapper;
+}
+
 /*
   Use provider instead of passing the props to each layer:
 */
 const Layer1 = () => <Layer2 />;
-const Layer2 = () => (
-  <Toggle.Consumer>
-    {({ on }) => (
-      <Fragment>
-        {on ? 'The button is ON' : 'The button is OFF'}
-        <Layer3 />
-      </Fragment>
-    )}
-  </Toggle.Consumer>
-);
+const Layer2 = withToggle(({ toggle: { on }}) => (
+  <Fragment>
+    {on ? 'The button is ON' : 'The button is OFF'}
+    <Layer3 />
+  </Fragment>
+));
 const Layer3 = () => <Layer4 />;
-const Layer4 = () => (
-  <Toggle.Consumer>
-    {({ on, toggle }) => <Switch checked={on} onChange={toggle} />}
-  </Toggle.Consumer>
-);
+const Layer4 = withToggle(({ toggle: { on, toggle }}) => (
+  <Switch checked={on} onChange={toggle} />
+));
   
 class Usage extends Component {
   initialState = { bothOn: false };
