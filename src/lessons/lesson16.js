@@ -139,22 +139,24 @@ function withToggle(Component) {
     </Toggle.Consumer>
   );
 
+  Wrapper.displayName = `withToggle(${Component.displayName || Component.name})`;
+
   return hoistNonReactStatics(React.forwardRef(Wrapper), Component);
 }
 
 const myRef = React.createRef();
 
 const Layer1 = () => <Layer2 ref={myRef} />;
-const Layer2 = withToggle(({ toggle: { on }}) => (
+const Layer2 = withToggle(function Layer2({ toggle: { on }}) { return (
   <Fragment>
     {on ? 'The button is ON' : 'The button is OFF'}
     <Layer3 />
   </Fragment>
-));
+)});
 const Layer3 = () => <Layer4 />;
-const Layer4 = withToggle(({ toggle: { on, toggle }}) => (
+const Layer4 = withToggle(function Layer4({ toggle: { on, toggle }}) { return (
   <Switch checked={on} onChange={toggle} />
-));
+)});
   
 class Usage extends Component {
   initialState = { bothOn: false };
