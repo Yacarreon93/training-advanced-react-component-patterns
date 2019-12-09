@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import Switch from '../Switch';
 
@@ -117,6 +117,20 @@ class Toggle extends Component {
       );
   }
 }
+
+/*
+  What if we have a lot of layers?
+  Should we have to pass the props to every layer?
+*/
+const Layer1 = ({ on, toggle }) => <Layer2 on={on} toggle={toggle} />;
+const Layer2 = ({ on, toggle }) => (
+  <Fragment>
+    {on ? 'The button is ON' : 'The button is OFF'}
+    <Layer3 on={on} toggle={toggle} />
+  </Fragment>
+);
+const Layer3 = ({ on, toggle }) => <Layer4 on={on} toggle={toggle} />;
+const Layer4 = ({ on, toggle }) => <Switch checked={on} onChange={toggle} />;
   
 class Usage extends Component {
   initialState = { bothOn: false };
@@ -125,7 +139,11 @@ class Usage extends Component {
 
   lastWasButton = false;
 
-  handleToggle = on => this.setState(({ bothOn: on }));
+  handleToggle = on => {
+    console.log('handleToggle', on);
+
+    this.setState(({ bothOn: on }));
+  }
 
   handleStateChange = (changes) => {
     const isButtonChange = changes.type === Toggle.stateChangeTypes.toggleOff || changes.type === Toggle.stateChangeTypes.toggleOn;
@@ -140,12 +158,11 @@ class Usage extends Component {
   }
 
   render() {
-    const { bothOn } = this.state;
-
     return (
       <div>
-        <Toggle on={bothOn} onStateChange={this.handleStateChange} />
-        <Toggle on={bothOn} onStateChange={this.handleStateChange} />
+        <Toggle onToggle={this.handleToggle}>
+          {({ on, toggle }) => <Layer1 on={on} toggle={toggle} />}
+        </Toggle>
       </div>
     );
   }
