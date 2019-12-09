@@ -127,19 +127,24 @@ class Toggle extends Component {
 }
 
 function withToggle(Component) {
-  const Wrapper = props => (
+  const Wrapper = (props, ref) => (
     <Toggle.Consumer>
-      {toggleContext => <Component toggle={toggleContext} {...props} />}
+      {toggleContext => (
+        <Component
+          {...props}
+          ref={ref}
+          toggle={toggleContext}
+        />
+      )}
     </Toggle.Consumer>
   );
 
-  return hoistNonReactStatics(Wrapper, Component);
+  return hoistNonReactStatics(React.forwardRef(Wrapper), Component);
 }
 
-/*
-  Use provider instead of passing the props to each layer:
-*/
-const Layer1 = () => <Layer2 />;
+const myRef = React.createRef();
+
+const Layer1 = () => <Layer2 ref={myRef} />;
 const Layer2 = withToggle(({ toggle: { on }}) => (
   <Fragment>
     {on ? 'The button is ON' : 'The button is OFF'}
