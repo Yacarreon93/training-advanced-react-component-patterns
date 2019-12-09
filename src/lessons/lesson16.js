@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import hoistNonReactStatics from 'hoist-non-react-statics';
 
 import Switch from '../Switch';
 
@@ -132,7 +133,7 @@ function withToggle(Component) {
     </Toggle.Consumer>
   );
 
-  return Wrapper;
+  return hoistNonReactStatics(Wrapper, Component);
 }
 
 /*
