@@ -75,9 +75,9 @@ class Toggle extends Component {
     });
   }
 
-  toggle = ({ type = Toggle.stateChangeTypes.toggle } = {}) => this.internalSetState(({ on }) => ({
+  toggle = ({ on: newState, type = Toggle.stateChangeTypes.toggle } = {}) => this.internalSetState(({ on }) => ({
     type,
-    on: !on,
+    on: typeof newState === 'boolean' ? newState : !on,
   }), () => this.props.onToggle(this.getState().on));
 
   reset = () => this.internalSetState({
@@ -123,13 +123,19 @@ class Usage extends Component {
 
   state = this.initialState;
 
+  lastWasButton = false;
+
   handleToggle = on => this.setState(({ bothOn: on }));
 
   handleStateChange = (changes) => {
     const isButtonChange = changes.type === Toggle.stateChangeTypes.toggleOff || changes.type === Toggle.stateChangeTypes.toggleOn;
 
-    if (isButtonChange || changes.type === Toggle.stateChangeTypes.toggle) {
+    if ((this.lastWasButton && isButtonChange) || changes.type === Toggle.stateChangeTypes.toggle) {
       this.setState({ bothOn: changes.on });
+
+      this.lastWasButton = false;
+    } else {
+      this.lastWasButton = isButtonChange;
     }
   }
 
